@@ -45,52 +45,50 @@ class StomatologyPortal {
             localStorage.setItem('stomatology_categories', JSON.stringify(defaultCategories));
         }
 
-        // Проверяем, есть ли уже новости с 2025 годом
-        let news = JSON.parse(localStorage.getItem('stomatology_news')) || [];
-        
-        // Если новостей нет или последняя новость не 2025 года, создаем новые
-        if (news.length === 0 || !news.some(item => item.date.includes('2025'))) {
-            const defaultNews = [
-                {
-                    id: 1,
-                    title: 'Открытие нового отделения',
-                    description: 'Мы рады сообщить об открытии нового современного отделения в центре города.',
-                    date: '15.12.2025',
-                    category: 'Новости',
-                    image: 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80'
-                },
-                {
-                    id: 2,
-                    title: 'Новое оборудование',
-                    description: 'В нашу клинику поступило новое цифровое оборудование для диагностики.',
-                    date: '10.12.2025',
-                    category: 'Технологии',
-                    image: 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80'
-                },
-                {
-                    id: 3,
-                    title: 'Акция на отбеливание зубов',
-                    description: 'Специальное предложение на отбеливание зубов до конца месяца.',
-                    date: '05.12.2025',
-                    category: 'Акции',
-                    image: 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80'
-                },
-                {
-                    id: 4,
-                    title: 'Мастер-класс по гигиене',
-                    description: 'Приглашаем всех желающих на бесплатный мастер-класс по гигиене полости рта.',
-                    date: '01.12.2025',
-                    category: 'Мероприятия',
-                    image: 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80'
-                }
-            ];
-            localStorage.setItem('stomatology_news', JSON.stringify(defaultNews));
+       // ВСЕГДА устанавливаем фиксированные новости
+    const defaultNews = [
+        {
+            id: 1,
+            title: 'Скидки на имплантацию',
+            description: 'Специальное предложение на импалантацию зубов до конца месяца.',
+            date: '15.12.2025',
+            category: 'Акция',
+            image: 'implant.JPG'
+        },
+        {
+            id: 2,
+            title: 'Новое оборудование',
+            description: 'В нашу клинику поступило новое цифровое оборудование для диагностики.',
+            date: '10.12.2025',
+            category: 'Технологии',
+            image: 'diagnost.JPG'
+        },
+        {
+            id: 3,
+            title: 'Открытие нового кабинета',
+            description: 'Мы открыли новый современный кабинет для ортодонтического лечения.',
+            date: '05.12.2025',
+            category: 'Новости',
+            image: 'kabinet.jpg'
+        },
+        {
+            id: 4,
+            title: 'Новогодние каникулы',
+            description: 'График работы в новогодние праздники.',
+            date: '01.12.2025',
+            category: 'Праздник',
+            image: 'newyear.JPG'
         }
+    ];
+    
+    // Всегда устанавливаем фиксированные новости (перезаписываем если что-то уже есть)
+    localStorage.setItem('stomatology_news', JSON.stringify(defaultNews));
 
-        if (!localStorage.getItem('stomatology_visitorCount')) {
-            localStorage.setItem('stomatology_visitorCount', '0');
-        }
+    if (!localStorage.getItem('stomatology_visitorCount')) {
+        localStorage.setItem('stomatology_visitorCount', '0');
     }
+}
+  
 
     initAuthState() {
         // Проверка авторизации пользователя
@@ -824,4 +822,5 @@ if (window.location.pathname.includes('index.html') || window.location.pathname 
     document.addEventListener('DOMContentLoaded', () => {
         portal = new StomatologyPortal();
     });
+
 }
