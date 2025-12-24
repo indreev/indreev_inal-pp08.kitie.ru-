@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Стоматология DENTAL CORE | Администратор</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" type="image/x-icon" href="../logo.png">
+</head>
+<body>
+    <!-- Шапка сайта -->
+    <header class="header">
+        <div class="container header-container">
+            <div class="logo">
+                <a href="../index.html">
+                    <img src="../logo.png" alt="Логотип Стоматология DENTAL CORE">
+                    <span>Панель администратора</span>
+                </a>
+            </div>
+            
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="../index.html"><i class="fas fa-home"></i> На главную</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Основной контент -->
+    <main class="main">
+        <div class="container">
+            <!-- Боковое меню админки -->
+            <div class="admin-layout">
+                <aside class="admin-sidebar">
+                    <nav class="admin-nav">
+                        <ul>
+                            <li><a href="#requests" class="active" data-section="requests"><i class="fas fa-tasks"></i> Управление заявками</a></li>
+                            <li><a href="#categories" data-section="categories"><i class="fas fa-tags"></i> Управление категориями</a></li>
+                        </ul>
+                    </nav>
+                </aside>
+
+                <!-- Основное содержание -->
+                <div class="admin-content">
+                    <!-- Секция управления заявками -->
+                    <section id="requests" class="admin-section active">
+                        <div class="admin-header">
+                            <h1><i class="fas fa-tasks"></i> Управление заявками</h1>
+                            <div class="admin-stats">
+                                <div class="stat-card">
+                                    <i class="fas fa-inbox"></i>
+                                    <h3 id="newRequestsCount">0</h3>
+                                    <p>Новые заявки</p>
+                                </div>
+                                <div class="stat-card">
+                                    <i class="fas fa-check-circle"></i>
+                                    <h3 id="solvedRequestsCount">0</h3>
+                                    <p>Решено</p>
+                                </div>
+                                <div class="stat-card">
+                                    <i class="fas fa-times-circle"></i>
+                                    <h3 id="rejectedRequestsCount">0</h3>
+                                    <p>Отклонено</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Фильтры -->
+                        <div class="filter-buttons">
+                            <button class="filter-btn active" data-filter="all">Все</button>
+                            <button class="filter-btn" data-filter="new">Новые</button>
+                            <button class="filter-btn" data-filter="solved">Решены</button>
+                            <button class="filter-btn" data-filter="rejected">Отклонены</button>
+                        </div>
+
+                        <!-- Список заявок -->
+                        <div id="adminRequestsList" class="request-list">
+                            <!-- Заявки будут загружены через JS -->
+                        </div>
+                    </section>
+
+                    <!-- Секция управления категориями -->
+                    <section id="categories" class="admin-section" style="display: none;">
+                        <div class="admin-header">
+                            <h1><i class="fas fa-tags"></i> Управление категориями</h1>
+                        </div>
+
+                        <div class="categories-management">
+                            <div class="categories-list" id="categoriesList">
+                                <!-- Список категорий -->
+                            </div>
+                            <div class="add-category">
+                                <h3>Добавить категорию</h3>
+                                <div class="form-group" style="margin-bottom: 15px;">
+                                    <input type="text" id="newCategoryName" placeholder="Название категории" style="margin-bottom: 15px;">
+                                </div>
+                                <div style="text-align: center; margin-top: 20px;">
+                                    <button class="btn-primary" onclick="admin.addCategory()" style="margin: 0 auto; display: block;">
+                                        <i class="fas fa-plus"></i> Добавить 
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Модальное окно для изменения статуса -->
+    <div id="statusModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="modalTitle">Изменение статуса заявки</h2>
+            <div id="modalContent">
+                <!-- Контент зависит от действия -->
+            </div>
+        </div>
+    </div>
+
+    <script src="../script.js"></script>
+    <style>
+        /* Дополнительные стили для админки */
+        .add-category {
+            background: var(--white);
+            padding: 25px;
+            border-radius: var(--border-radius);
+            border: 2px dashed var(--primary-blue);
+            transition: var(--transition);
+            text-align: center;
+        }
+
+        .add-category h3 {
+            margin-bottom: 25px;
+            color: var(--black);
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .add-category .form-group {
+            margin-bottom: 25px;
+        }
+
+        .add-category input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--gray-medium);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .add-category input:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+        }
+    </style>
+    <script>
+        // Админские функции
+        class AdminManager {
+            constructor() {
+                this.checkAdminAccess();
+                this.init();
+            }
+
+            checkAdminAccess() {
+                const currentUser = JSON.parse(localStorage.getItem('stomatology_currentUser'));
+                if (!currentUser || currentUser.role !== 'admin') {
+                    alert('Доступ запрещен! Требуются права администратора.');
+                    window.location.href = '../index.html';
+                }
+            }
+
+            init() {
+                this.loadRequests();
+                this.loadCategories();
+                this.initEventListeners();
+                this.updateStats();
+                this.initNavigation();
+            }
+
+            initNavigation() {
+                const navLinks = document.querySelectorAll('.admin-nav a');
+                const sections = document.querySelectorAll('.admin-section');
+                
+                navLinks.forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        
+                        // Удаляем активный класс у всех ссылок
+                        navLinks.forEach(l => l.classList.remove('active'));
+                        
+                        // Добавляем активный класс текущей ссылке
+                        link.classList.add('active');
+                        
+                        // Скрываем все секции
+                        sections.forEach(section => {
+                            section.style.display = 'none';
+                        });
+                        
+                        // Показываем выбранную секцию
+                        const sectionId = link.getAttribute('data-section');
+                        const targetSection = document.getElementById(sectionId);
+                        if (targetSection) {
+                            targetSection.style.display = 'block';
+                        }
+                    });
+                });
+                
+                // Обработка якорных ссылок
+                const hash = window.location.hash.substring(1);
+                if (hash) {
+                    const targetLink = document.querySelector(`.admin-nav a[data-section="${hash}"]`);
+                    if (targetLink) {
+                        targetLink.click();
+                    }
+                }
+            }
+
+            loadRequests() {
+                const requests = JSON.parse(localStorage.getItem('stomatology_requests')) || [];
+                const users = JSON.parse(localStorage.getItem('stomatology_users')) || [];
+                
+                const requestsList = document.getElementById('adminRequestsList');
+                
+                if (requests.length === 0) {
+                    requestsList.innerHTML = '<p class="no-requests">Нет заявок</p>';
+                    return;
+                }
+                
+                requestsList.innerHTML = requests.map(request => {
+                    const user = users.find(u => u.id === request.userId);
+                    const userName = user ? user.fio : 'Неизвестный пользователь';
+                    
+                    return `
+                        <div class="request-item ${request.status}" data-id="${request.id}">
+                            <div class="request-header">
+                                <span class="request-date">${request.date}</span>
+                                <span class="request-status status-${request.status}">
+                                    ${this.getStatusText(request.status)}
+                                </span>
+                                <span class="request-user">${userName}</span>
+                            </div>
+                            <h4 class="request-title">${request.title}</h4>
+                            <p>${request.description}</p>
+                            <div class="request-meta">
+                                <span>Категория: ${this.getCategoryName(request.categoryId)}</span>
+                            </div>
+                            <div class="request-actions">
+                                ${request.status === 'new' ? `
+                                    <button class="btn-primary" onclick="admin.changeStatus(${request.id}, 'solved')">
+                                        <i class="fas fa-check"></i> Решена
+                                    </button>
+                                    <button class="btn-danger" onclick="admin.showRejectReasonModal(${request.id})">
+                                        <i class="fas fa-times"></i> Отклонить
+                                    </button>
+                                ` : ''}
+                                ${request.status === 'rejected' && request.rejectReason ? `
+                                    <div class="reject-reason">
+                                        <strong>Причина отказа:</strong> ${request.rejectReason}
+                                    </div>
+                                ` : ''}
+                                ${request.status === 'solved' ? `
+                                    <div class="solved-info">
+                                        <strong>Статус:</strong> Заявка решена
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            loadCategories() {
+                const categories = JSON.parse(localStorage.getItem('stomatology_categories')) || [];
+                const categoriesList = document.getElementById('categoriesList');
+                
+                if (categories.length === 0) {
+                    categoriesList.innerHTML = '<p class="no-categories">Нет категорий</p>';
+                    return;
+                }
+                
+                categoriesList.innerHTML = categories.map(category => `
+                    <div class="category-item" data-id="${category.id}">
+                        <span>${category.name}</span>
+                        <button class="btn-danger" onclick="admin.deleteCategory(${category.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `).join('');
+            }
+
+            updateStats() {
+                const requests = JSON.parse(localStorage.getItem('stomatology_requests')) || [];
+                
+                const newCount = requests.filter(r => r.status === 'new').length;
+                const solvedCount = requests.filter(r => r.status === 'solved').length;
+                const rejectedCount = requests.filter(r => r.status === 'rejected').length;
+                
+                document.getElementById('newRequestsCount').textContent = newCount;
+                document.getElementById('solvedRequestsCount').textContent = solvedCount;
+                document.getElementById('rejectedRequestsCount').textContent = rejectedCount;
+            }
+
+            getStatusText(status) {
+                const statusMap = {
+                    'new': 'Новая',
+                    'solved': 'Решена',
+                    'rejected': 'Отклонена'
+                };
+                return statusMap[status] || status;
+            }
+
+            getCategoryName(categoryId) {
+                const categories = JSON.parse(localStorage.getItem('stomatology_categories')) || [];
+                const category = categories.find(cat => cat.id == categoryId);
+                return category ? category.name : 'Неизвестно';
+            }
+
+            changeStatus(requestId, newStatus) {
+                const requests = JSON.parse(localStorage.getItem('stomatology_requests')) || [];
+                const requestIndex = requests.findIndex(r => r.id === requestId);
+                
+                if (requestIndex !== -1) {
+                    if (newStatus === 'rejected') {
+                        this.showRejectReasonModal(requestId);
+                    } else {
+                        requests[requestIndex].status = newStatus;
+                        if (requests[requestIndex].rejectReason) {
+                            delete requests[requestIndex].rejectReason;
+                        }
+                        localStorage.setItem('stomatology_requests', JSON.stringify(requests));
+                        this.loadRequests();
+                        this.updateStats();
+                        
+                        // Показать уведомление
+                        this.showNotification(`Статус заявки изменен на "${this.getStatusText(newStatus)}"`, 'success');
+                    }
+                }
+            }
+
+            showRejectReasonModal(requestId) {
+                const modal = document.getElementById('statusModal');
+                const modalTitle = document.getElementById('modalTitle');
+                const modalContent = document.getElementById('modalContent');
+                
+                modalTitle.textContent = 'Отклонение заявки';
+                modalContent.innerHTML = `
+                    <div class="form-group">
+                        <label for="rejectReason">Причина отказа:</label>
+                        <textarea id="rejectReason" rows="4" placeholder="Введите причину отказа..." required></textarea>
+                        <div class="error-message" id="reasonError" style="display: none;"></div>
+                    </div>
+                    <div class="modal-actions">
+                        <button class="btn-secondary" onclick="admin.closeModal()">Отмена</button>
+                        <button class="btn-danger" onclick="admin.submitReject(${requestId})">
+                            <i class="fas fa-times"></i> Отклонить
+                        </button>
+                    </div>
+                `;
+                
+                modal.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+            }
+
+            submitReject(requestId) {
+                const reasonInput = document.getElementById('rejectReason');
+                const reason = reasonInput.value.trim();
+                const errorElement = document.getElementById('reasonError');
+                
+                if (!reason) {
+                    errorElement.textContent = 'Введите причину отказа';
+                    errorElement.style.display = 'block';
+                    return;
+                }
+                
+                const requests = JSON.parse(localStorage.getItem('stomatology_requests')) || [];
+                const requestIndex = requests.findIndex(r => r.id === requestId);
+                
+                if (requestIndex !== -1) {
+                    requests[requestIndex].status = 'rejected';
+                    requests[requestIndex].rejectReason = reason;
+                    localStorage.setItem('stomatology_requests', JSON.stringify(requests));
+                    
+                    this.closeModal();
+                    this.loadRequests();
+                    this.updateStats();
+                    this.showNotification('Заявка отклонена', 'success');
+                }
+            }
+
+            addCategory() {
+                const nameInput = document.getElementById('newCategoryName');
+                const name = nameInput.value.trim();
+                
+                if (!name) {
+                    this.showNotification('Введите название категории', 'error');
+                    nameInput.focus();
+                    return;
+                }
+                
+                const categories = JSON.parse(localStorage.getItem('stomatology_categories')) || [];
+                
+                // Проверка на дубликат
+                if (categories.some(cat => cat.name.toLowerCase() === name.toLowerCase())) {
+                    this.showNotification('Категория с таким названием уже существует', 'error');
+                    nameInput.focus();
+                    return;
+                }
+                
+                const newCategory = {
+                    id: Date.now(),
+                    name: name
+                };
+                
+                categories.push(newCategory);
+                localStorage.setItem('stomatology_categories', JSON.stringify(categories));
+                
+                nameInput.value = '';
+                this.loadCategories();
+                this.showNotification('Категория добавлена', 'success');
+                nameInput.focus();
+            }
+
+            deleteCategory(categoryId) {
+                if (!confirm('Вы уверены, что хотите удалить эту категорию?')) return;
+                
+                const categories = JSON.parse(localStorage.getItem('stomatology_categories')) || [];
+                const categoryIndex = categories.findIndex(c => c.id === categoryId);
+                
+                if (categoryIndex !== -1) {
+                    categories.splice(categoryIndex, 1);
+                    localStorage.setItem('stomatology_categories', JSON.stringify(categories));
+                    this.loadCategories();
+                    this.showNotification('Категория удалена', 'success');
+                }
+            }
+
+            closeModal() {
+                const modal = document.getElementById('statusModal');
+                modal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+
+            showNotification(message, type = 'info') {
+                const notification = document.createElement('div');
+                notification.className = `notification notification-${type}`;
+                notification.innerHTML = `
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                    <span>${message}</span>
+                `;
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: ${type === 'success' ? '#4CAF50' : type === 'error' ? '#FF6B6B' : '#2196F3'};
+                    color: white;
+                    padding: 15px 20px;
+                    border-radius: 8px;
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    z-index: 10000;
+                    animation: slideInRight 0.3s ease;
+                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                `;
+
+                document.body.appendChild(notification);
+
+                setTimeout(() => {
+                    notification.style.animation = 'slideOutRight 0.3s ease';
+                    setTimeout(() => notification.remove(), 300);
+                }, 3000);
+            }
+
+            initEventListeners() {
+                // Фильтрация заявок
+                document.querySelectorAll('.filter-btn').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+                        e.target.classList.add('active');
+                        this.filterRequests(e.target.dataset.filter);
+                    });
+                });
+
+                // Закрытие модального окна
+                document.querySelectorAll('.close').forEach(button => {
+                    button.addEventListener('click', () => {
+                        this.closeModal();
+                    });
+                });
+
+                // Закрытие модального окна по клику вне его
+                window.addEventListener('click', (e) => {
+                    if (e.target === document.getElementById('statusModal')) {
+                        this.closeModal();
+                    }
+                });
+
+                // Обработка нажатия Enter в поле добавления категории
+                const categoryInput = document.getElementById('newCategoryName');
+                if (categoryInput) {
+                    categoryInput.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            this.addCategory();
+                        }
+                    });
+                }
+            }
+
+            filterRequests(filter) {
+                const requestItems = document.querySelectorAll('.request-item');
+                requestItems.forEach(item => {
+                    if (filter === 'all' || item.classList.contains(filter)) {
+                        item.style.display = 'block';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            }
+        }
+
+        // Инициализация админки
+        let admin;
+        document.addEventListener('DOMContentLoaded', () => {
+            admin = new AdminManager();
+        });
+
+        // Глобальные функции
+        window.admin = {
+            changeStatus: function(requestId, status) {
+                admin.changeStatus(requestId, status);
+            },
+            showRejectReasonModal: function(requestId) {
+                admin.showRejectReasonModal(requestId);
+            },
+            submitReject: function(requestId) {
+                admin.submitReject(requestId);
+            },
+            addCategory: function() {
+                admin.addCategory();
+            },
+            deleteCategory: function(categoryId) {
+                admin.deleteCategory(categoryId);
+            },
+            closeModal: function() {
+                admin.closeModal();
+            }
+        };
+    </script>
+</body>
+</html>
