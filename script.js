@@ -824,3 +824,4 @@ if (window.location.pathname.includes('index.html') || window.location.pathname 
     });
 
 }
+
