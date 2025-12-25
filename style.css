@@ -1403,18 +1403,26 @@ section h2 i {
     border-top: 1px solid var(--gray-light);
 }
 
-/* Адаптивность для смартфонов 720x1440px */
 @media (max-width: 768px) {
+    body {
+        padding-top: 0; /* Убираем отступ на мобильных, так как хедер не фиксированный */
+    }
+    
     .container {
         padding: 0 15px;
     }
     
+    /* ИСПРАВЛЕНО: хедер для мобильных */
+    .header {
+        position: relative; /* На мобильных делаем относительное позиционирование */
+        height: auto;
+        padding: 10px 0;
+    }
+    
     .header-container {
         flex-direction: column;
-        gap: 30px;
-        color: #0166cc;
-        padding: 10px 0;
-        height: auto;
+        gap: 15px;
+        padding: 0 15px;
     }
     
     .logo a {
@@ -1429,26 +1437,43 @@ section h2 i {
     .header-right {
         width: 100%;
         justify-content: space-between;
-        gap: 15px;
+        gap: 10px;
+        flex-wrap: wrap;
     }
     
     .visitor-counter {
         padding: 6px 12px;
         font-size: 0.85rem;
+        order: 2;
+        width: 100%;
+        justify-content: center;
+        margin-top: 10px;
+    }
+    
+    /* ИСПРАВЛЕНО: меню для мобильных */
+    .main-nav {
+        width: 100%;
+        margin-left: 0;
+        order: 1;
     }
     
     .main-nav ul {
-        gap: 8px;
-
+        gap: 6px;
         flex-wrap: wrap;
         justify-content: center;
     }
     
     .main-nav a {
-        padding: 8px 16px;
-        font-size: 0.9rem;
-        color: #0166cc;
-        height: 36px; /* Сохраняется единая высота на мобильных */
+        padding: 8px 12px;
+        font-size: 0.85rem;
+        height: 32px;
+        min-width: 80px;
+        justify-content: center;
+    }
+    
+    .main {
+        margin-top: 0;
+        padding: 20px 0;
     }
     
     .main-container,
@@ -1469,10 +1494,9 @@ section h2 i {
         margin-bottom: 20px;
     }
     
-    /* Исправление меню для мобильных */
     .vertical-nav a,
     .admin-nav a {
-        height: 50px;
+        height: 46px;
         padding: 12px 16px;
         margin-bottom: 6px;
     }
@@ -1482,91 +1506,138 @@ section h2 i {
     }
     
     .welcome-section {
-        padding: 25px;
-        margin-bottom: 30px;
+        padding: 20px;
+        margin-bottom: 20px;
     }
     
     .welcome-section h1 {
-        font-size: 1.8rem;
+        font-size: 1.6rem;
     }
     
     .welcome-section p {
-        font-size: 1rem;
+        font-size: 0.95rem;
     }
     
     .news-grid,
     .services-grid,
     .doctors-grid {
         grid-template-columns: 1fr;
-        gap: 20px;
+        gap: 15px;
     }
     
     .admin-stats {
         grid-template-columns: 1fr;
-        gap: 15px;
+        gap: 12px;
     }
     
     .stat-card {
-        padding: 20px;
+        padding: 15px;
+    }
+    
+    .stat-card h3 {
+        font-size: 1.8rem;
     }
     
     .categories-management {
         grid-template-columns: 1fr;
-        gap: 20px;
+        gap: 15px;
     }
     
     .modal-content {
         width: 95%;
-        margin: 20px auto;
-        padding: 20px;
+        margin: 10px auto;
+        padding: 15px;
     }
     
     .request-header {
         flex-direction: column;
         align-items: flex-start;
-    }
-    
-    .filter-buttons {
         gap: 8px;
     }
     
+    .filter-buttons {
+        gap: 6px;
+        justify-content: center;
+    }
+    
     .filter-btn {
-        padding: 10px 20px;
-        font-size: 0.9rem;
-        height: 40px;
-        min-width: 80px;
+        padding: 8px 12px;
+        font-size: 0.8rem;
+        height: 36px;
+        min-width: 70px;
     }
     
     .btn-primary,
     .btn-secondary,
     .btn-danger {
-        padding: 12px 20px;
-        font-size: 0.9rem;
-        height: 44px;
-        min-width: 100px;
+        padding: 10px 15px;
+        font-size: 0.85rem;
+        height: 40px;
+        min-width: 90px;
     }
     
     section {
-        margin-bottom: 40px;
+        margin-bottom: 30px;
     }
     
     section h2 {
-        font-size: 1.4rem;
-        margin-bottom: 20px;
+        font-size: 1.3rem;
+        margin-bottom: 15px;
     }
     
     .form-container {
-        padding: 25px;
-        margin: 30px auto;
+        padding: 20px;
+        margin: 20px auto;
     }
     
     .form-container h2 {
-        font-size: 1.4rem;
+        font-size: 1.3rem;
     }
     
     .doctor-card img {
-        width: 120px;
-        height: 120px;
+        width: 100px;
+        height: 100px;
+    }
+    
+    .form-group {
+        margin-bottom: 18px;
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 12px;
+    }
+}
+
+/* Для планшетов 740x1440px и подобных */
+@media (max-width: 740px) and (orientation: portrait) {
+    .header-container {
+        padding: 5px 10px;
+    }
+    
+    .main-nav a {
+        font-size: 0.8rem;
+        padding: 6px 10px;
+        height: 30px;
+        min-width: 70px;
+    }
+    
+    .visitor-counter {
+        font-size: 0.8rem;
+        padding: 5px 10px;
+    }
+    
+    .welcome-section {
+        padding: 15px;
+    }
+    
+    .welcome-section h1 {
+        font-size: 1.4rem;
+    }
+    
+    .main {
+        padding: 15px 0;
     }
 }
 
@@ -1595,6 +1666,36 @@ section h2 i {
     
     .news-grid {
         grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    }
+    
+    /* Оптимизация для средних экранов */
+    .main-nav a {
+        padding: 8px 14px;
+        font-size: 0.88rem;
+    }
+}
+
+/* Специальный медиа-запрос для очень узких экранов */
+@media (max-width: 480px) {
+    .main-nav ul {
+        gap: 4px;
+    }
+    
+    .main-nav a {
+        padding: 6px 8px;
+        font-size: 0.75rem;
+        height: 28px;
+        min-width: 60px;
+    }
+    
+    .logo a {
+        font-size: 1rem;
+    }
+    
+    .logo img {
+        height: 30px;
+        width: 30px;
+        margin-right: 8px;
     }
 }
 
